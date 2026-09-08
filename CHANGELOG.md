@@ -42,6 +42,32 @@
   `/track/<id>` URLs and looked up as tracks, which found nothing. The kind is
   now read from the URI.
 
+- **A `/gp` song that dropped part-way through was scored as one that never played** (#423).
+  "The stream never opened" and "there was enough of it to have fooled anyone" were one
+  30-second line, so a stream that died at twenty-nine seconds threw away the guesses the
+  room had actually cast, threw away its 👍, and told a room that had just heard half a
+  minute that the song could not be played.
+
+  They are two questions now. A dead link is a stream that errored within two seconds:
+  nothing reached the room, nothing is scored, and the reveal says so. Past that the stream
+  did open, so the guesses, 👍 and full-song points the song earned are paid -- what it does
+  not earn is the fooled-everyone bonus, which still wants the thirty seconds (scaled to the
+  clip) behind it, because nobody guessing a song that played for three seconds says nothing
+  about how well it was hidden.
+
+- **The fooled-everyone bonus was paid for songs the room never got a chance at.** The old
+  bar only looked at streams that *errored*, so every other way a song can stop early paid
+  out in full: `/gp voteskip` on your own song pulls it outright, and pulling it before
+  anyone guessed collected the 100 every time. The bar now applies however the song stopped
+  -- the clip timer, a skip vote, a submitter pulling their own -- while a song that ran to
+  its own end counts as heard in full however short it is.
+
+- **A stale `/gp end` backstop could collect the next game** (#423). `/gp end` spawns a
+  10-second backstop that removes the game if the `End` it queued never arrives. Two games
+  ended within that window put the first backstop inside the second game's parked window,
+  where it would collect a game it was never spawned for. Each park now carries a token and
+  a backstop collects only its own.
+
 ## TODO:
 
 - [ ] /changenicks command. Renames all users in the guild
