@@ -4677,4 +4677,34 @@ mod test {
             }
         }
     }
+
+    /// TEMP: does the play order actually vary round to round with the real rng?
+    #[test]
+    fn tmp_order_varies_with_thread_rng() {
+        let data = data();
+        let prompts: Vec<String> = (0..20).map(|i| format!("p{i}")).collect();
+        let names: Vec<&str> = prompts.iter().map(|s| s.as_str()).collect();
+        game_with(&data, &names);
+        let mut orders = Vec::new();
+        for round in 0..20 {
+            submit(&data, A, "alice", "a");
+            submit(&data, B, "bob", "b");
+            submit(&data, C, "carol", "c");
+            submit(&data, D, "dave", "d");
+            data.gp_close_window(G, A, &mut rand::rng(), NOW).unwrap();
+            let order: Vec<u64> = game(&data).rounds[round]
+                .tracks
+                .iter()
+                .map(|t| t.submitter.get())
+                .collect();
+            println!("round {round:2}: {order:?}");
+            orders.push(order);
+            for t in 0..4 {
+                data.gp_reveal_and_advance(G, round, t, NOW).unwrap();
+            }
+        }
+        let distinct: std::collections::HashSet<_> = orders.iter().collect();
+        println!("distinct orders over 20 rounds: {}", distinct.len());
+        assert!(distinct.len() > 1);
+    }
 }
